@@ -1,24 +1,27 @@
-// TODO: Add JWT authentication
 package main
 
 import (
 	"context"
 	"log"
+	"net/http"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Input struct {
-	Email    string `json:"email" bson:"email"`
-	Password string `json:"password" bson:"password"`
+type Creds struct {
+	UserId   primitive.ObjectID `json:"_id" bson:"_id"`
+	Email    string             `json:"email" bson:"email"`
+	Password string             `json:"password" bson:"password"`
 }
 
 type Response struct {
-	StatusCode int    `json:"statusCode"`
-	Body       string `json:"body"`
+	StatusCode int    `json:"statusCode,omitempty"`
+	Body       string `json:"body,omitempty"`
 }
 
 // Main is the entrypoint of jwt auth function
-func Main(input map[string]interface{}) {
+func Main(input map[string]interface{}) *Response {
 	// create mongo connection
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -32,14 +35,20 @@ func Main(input map[string]interface{}) {
 	// extract and check if the input is valid
 	email, ok := input["email"].(string)
 	if !ok {
-		return
+		return &Response{
+			StatusCode: http.StatusBadRequest,
+			Body:       ErrInvalidInput.Error(),
+		}
 	}
 	password, ok := input["password"].(string)
 	if !ok {
-		return
+		return &Response{
+			StatusCode: http.StatusBadRequest,
+			Body:       ErrInvalidInput.Error(),
+		}
 	}
 
-	user := Input{
+	user := Creds{
 		Email:    email,
 		Password: password,
 	}
@@ -50,16 +59,32 @@ func Main(input map[string]interface{}) {
 	if !ok {
 		_, ok := input["register"].(string)
 		if !ok {
-			return
+			return &Response{
+				StatusCode: http.StatusNotFound,
+			}
 		}
-		_, err := Register(ctx, client, user)
+		token, err := Register(ctx, client, user)
 		if err != nil {
-			return
+			return &Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       ErrInternalServer.Error(),
+			}
+		}
+		return &Response{
+			StatusCode: http.StatusOK,
+			Body:       token,
 		}
 	}
 	// call login function
-	_, err = Login(ctx, client, user)
+	token, err := Login(ctx, client, user)
 	if err != nil {
-		return
+		return &Response{
+			StatusCode: http.StatusInternalServerError,
+			Body:       ErrInternalServer.Error(),
+		}
+	}
+	return &Response{
+		StatusCode: http.StatusOK,
+		Body:       token,
 	}
 }

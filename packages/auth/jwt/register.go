@@ -2,14 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Register creates a new user entry in the db
-func Register(ctx context.Context, mc *mongo.Client, input Input) (string, error) {
+func Register(ctx context.Context, mc *mongo.Client, input Creds) (string, error) {
 	// check if the email already exists
 	filter := bson.M{"email": input.Email}
 	singleRes := mc.Database("auth").Collection("users").FindOne(ctx, filter)
@@ -18,6 +20,7 @@ func Register(ctx context.Context, mc *mongo.Client, input Input) (string, error
 		return "", singleRes.Err()
 	}
 
+	var insertedId string
 	if singleRes.Err() == mongo.ErrNoDocuments {
 		// hash the password before storing
 		hashedPass, err := Hash(input.Password)
@@ -34,8 +37,11 @@ func Register(ctx context.Context, mc *mongo.Client, input Input) (string, error
 		if err != nil {
 			return "", err
 		}
-		_ = insertOneRes
+		insertedId = fmt.Sprint(insertOneRes.InsertedID.(primitive.ObjectID))
 	}
-	// TODO: generate jwt token
-	return "", nil
+	token, err := CreateToken(insertedId)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }

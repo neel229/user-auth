@@ -2,6 +2,7 @@ targetNamespace: ""
 parameters: {}
 environment:
   DB_URL: ${DB_URL}
+  JWT_KEY: ${JWT_KEY}
 packages:
   - name: auth
     environment: {}
