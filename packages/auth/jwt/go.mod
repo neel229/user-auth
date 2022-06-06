@@ -1,6 +1,6 @@
 module github.com/neel229/user-auth
 
-go 1.18
+go 1.17
 
 require (
 	go.mongodb.org/mongo-driver v1.9.1

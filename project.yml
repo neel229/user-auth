@@ -1,16 +1,16 @@
 targetNamespace: ""
 parameters: {}
 environment:
-  DATABASE_URL: ${DATABASE_URL}
+  DB_URL: ${DB_URL}
 packages:
-  - name: cloud
+  - name: auth
     environment: {}
     parameters: {}
     annotations: {}
     actions:
-      - name: register
+      - name: jwt
         binary: false
-        main: ""
+        main: "main"
         runtime: "go:default"
         web: true
         parameters: {}
