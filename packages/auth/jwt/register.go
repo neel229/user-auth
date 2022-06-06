@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -32,12 +31,13 @@ func Register(ctx context.Context, mc *mongo.Client, input Creds) (string, error
 		user := bson.D{
 			{Key: "email", Value: input.Email},
 			{Key: "password", Value: hashedPass},
+			{Key: "username", Value: input.UserName},
 		}
 		insertOneRes, err := mc.Database("auth").Collection("users").InsertOne(ctx, user)
 		if err != nil {
 			return "", err
 		}
-		insertedId = fmt.Sprint(insertOneRes.InsertedID.(primitive.ObjectID))
+		insertedId = insertOneRes.InsertedID.(primitive.ObjectID).Hex()
 	}
 	token, err := CreateToken(insertedId)
 	if err != nil {

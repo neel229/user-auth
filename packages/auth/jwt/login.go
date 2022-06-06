@@ -24,7 +24,6 @@ func Login(ctx context.Context, mc *mongo.Client, input Creds) (string, error) {
 		log.Println("error decoding user")
 		return "", err
 	}
-	log.Println(user)
 	match, err := Verify(input.Password, user.Password)
 	if err != nil {
 		log.Println(err)
@@ -33,7 +32,7 @@ func Login(ctx context.Context, mc *mongo.Client, input Creds) (string, error) {
 	if !match {
 		return "", ErrPassInvalid
 	}
-	userId := user.UserId.String()
+	userId := user.UserId.Hex()
 	token, err := CreateToken(userId)
 	if err != nil {
 		return "", err

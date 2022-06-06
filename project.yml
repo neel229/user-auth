@@ -18,3 +18,12 @@ packages:
         environment: {}
         annotations: {}
         limits: {}
+      - name: me
+        binary: false
+        main: "main"
+        runtime: "go:default"
+        web: true
+        parameters: {}
+        environment: {}
+        annotations: {}
+        limits: {}

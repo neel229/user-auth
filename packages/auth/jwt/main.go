@@ -11,6 +11,7 @@ import (
 
 type Creds struct {
 	UserId   primitive.ObjectID `json:"_id" bson:"_id"`
+	UserName string             `json:"username" bson:"username"`
 	Email    string             `json:"email" bson:"email"`
 	Password string             `json:"password" bson:"password"`
 }
@@ -48,11 +49,6 @@ func Main(input map[string]interface{}) *Response {
 		}
 	}
 
-	user := Creds{
-		Email:    email,
-		Password: password,
-	}
-
 	// check for login/register and call
 	// corresponding function
 	_, ok = input["login"].(string)
@@ -62,6 +58,18 @@ func Main(input map[string]interface{}) *Response {
 			return &Response{
 				StatusCode: http.StatusNotFound,
 			}
+		}
+		username, ok := input["username"].(string)
+		if !ok {
+			return &Response{
+				StatusCode: http.StatusBadRequest,
+				Body:       ErrInvalidInput.Error(),
+			}
+		}
+		user := Creds{
+			Email:    email,
+			Password: password,
+			UserName: username,
 		}
 		token, err := Register(ctx, client, user)
 		if err != nil {
@@ -76,6 +84,10 @@ func Main(input map[string]interface{}) *Response {
 		}
 	}
 	// call login function
+	user := Creds{
+		Email:    email,
+		Password: password,
+	}
 	token, err := Login(ctx, client, user)
 	if err != nil {
 		return &Response{

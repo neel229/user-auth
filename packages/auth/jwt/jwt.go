@@ -33,23 +33,3 @@ func CreateToken(userId string) (string, error) {
 	}
 	return tokenString, nil
 }
-
-// VerityToken verifies the jwt token
-func VerifyToken(tokenString string) (bool, error) {
-	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-		return secret, nil
-	})
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			log.Println("invalid signature header")
-			return false, err
-		}
-		log.Printf("error parsing token: %v\n", err)
-		return false, err
-	}
-	if !token.Valid {
-		return false, nil
-	}
-	return true, nil
-}
