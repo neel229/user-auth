@@ -1,0 +1,19 @@
+targetNamespace: ""
+parameters: {}
+environment:
+  DATABASE_URL: ${DATABASE_URL}
+packages:
+  - name: cloud
+    environment: {}
+    parameters: {}
+    annotations: {}
+    actions:
+      - name: register
+        binary: false
+        main: ""
+        runtime: "go:default"
+        web: true
+        parameters: {}
+        environment: {}
+        annotations: {}
+        limits: {}
