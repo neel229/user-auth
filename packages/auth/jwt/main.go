@@ -33,6 +33,8 @@ func Main(input map[string]interface{}) *Response {
 	}
 	defer client.Disconnect(ctx)
 
+	log.Println("input: ", input)
+
 	// extract and check if the input is valid
 	email, ok := input["email"].(string)
 	if !ok {
@@ -73,6 +75,12 @@ func Main(input map[string]interface{}) *Response {
 		}
 		token, err := Register(ctx, client, user)
 		if err != nil {
+			if err == ErrEmailExists {
+				return &Response{
+					StatusCode: http.StatusBadRequest,
+					Body:       ErrEmailExists.Error(),
+				}
+			}
 			return &Response{
 				StatusCode: http.StatusInternalServerError,
 				Body:       ErrInternalServer.Error(),

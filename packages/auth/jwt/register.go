@@ -14,12 +14,13 @@ func Register(ctx context.Context, mc *mongo.Client, input Creds) (string, error
 	// check if the email already exists
 	filter := bson.M{"email": input.Email}
 	singleRes := mc.Database("auth").Collection("users").FindOne(ctx, filter)
-	if singleRes.Err() != mongo.ErrNoDocuments {
-		log.Printf("error fetching document: %v\n", singleRes.Err())
-		return "", singleRes.Err()
+	if singleRes.Err() != nil {
+		if singleRes.Err() != mongo.ErrNoDocuments {
+			log.Printf("error fetching document: %v\n", singleRes.Err())
+			return "", singleRes.Err()
+		}
 	}
 
-	var insertedId string
 	if singleRes.Err() == mongo.ErrNoDocuments {
 		// hash the password before storing
 		hashedPass, err := Hash(input.Password)
@@ -37,11 +38,12 @@ func Register(ctx context.Context, mc *mongo.Client, input Creds) (string, error
 		if err != nil {
 			return "", err
 		}
-		insertedId = insertOneRes.InsertedID.(primitive.ObjectID).Hex()
+		insertedId := insertOneRes.InsertedID.(primitive.ObjectID).Hex()
+		token, err := CreateToken(insertedId)
+		if err != nil {
+			return "", err
+		}
+		return token, nil
 	}
-	token, err := CreateToken(insertedId)
-	if err != nil {
-		return "", err
-	}
-	return token, nil
+	return "", ErrEmailExists
 }
