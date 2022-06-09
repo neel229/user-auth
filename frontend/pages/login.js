@@ -7,7 +7,7 @@ import Form from "../components/form";
 import { Magic } from "magic-sdk";
 import { register, login as loginFn } from "./api/backend";
 
-const Login = () => {
+const Login = ({ setAuthorized }) => {
   useUser({ redirectTo: "/", redirectIfFound: true });
 
   const [errorMsg, setErrorMsg] = useState("");
@@ -57,7 +57,12 @@ const Login = () => {
           email: email,
           password: password,
         };
-        await loginFn(body);
+        const res = await loginFn(body);
+        if (res.status === 200) {
+          setAuthorized(true);
+          return;
+        }
+        setErrorMsg(res.response.data);
         return;
       }
       const body = {
@@ -65,9 +70,15 @@ const Login = () => {
         email: email,
         password: password,
       };
-      await register(body);
+      const res = await register(body);
+      if (res.status === 200) {
+        setAuthorized(true);
+        return;
+      }
+      setErrorMsg(res.response.data);
+      return;
     } catch (err) {
-      console.error(err);
+      console.error("error in login: ", err);
     }
   }
 
@@ -75,7 +86,6 @@ const Login = () => {
     <Layout>
       <div className="login">
         <Form
-          isMagic={isMagic}
           errorMessage={errorMsg}
           login={login}
           setLogin={setLogin}
@@ -84,9 +94,6 @@ const Login = () => {
           setPassword={setPassword}
           onSubmit={handleSubmit}
         />
-        <button onClick={() => setIsMagic(!isMagic)}>
-          {isMagic ? <span>Use Email</span> : <span>Use Magic Link</span>}
-        </button>
       </div>
       <style jsx>{`
         .login {

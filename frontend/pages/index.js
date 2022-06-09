@@ -13,7 +13,7 @@ const Home = () => {
     if (exists) {
       setAuthorized(true);
     }
-  }, []);
+  }, [authorized]);
 
   if (authorized && !user) {
     Router.push("/me");
@@ -22,11 +22,16 @@ const Home = () => {
   return (
     <Layout>
       {!user ? (
-        <Login></Login>
+        <Login setAuthorized={setAuthorized}></Login>
       ) : (
         <>
           <p>Currently logged in as:</p>
           <pre>{JSON.stringify(user, null, 2)}</pre>
+          <div>
+            <button style={{ padding: "16px", fontWeight: "bold" }}>
+              Logout
+            </button>
+          </div>
         </>
       )}
 

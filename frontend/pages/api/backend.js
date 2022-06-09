@@ -19,9 +19,10 @@ export const register = async (body) => {
       }
     );
     localStorage.setItem("jwt", res.data);
+    return res;
   } catch (err) {
     console.error(err);
-    return err.message;
+    return err;
   }
 };
 
@@ -40,9 +41,10 @@ export const login = async (body) => {
       }
     );
     localStorage.setItem("jwt", res.data);
+    return res;
   } catch (err) {
     console.error(err);
-    return err.message;
+    return err;
   }
 };
 

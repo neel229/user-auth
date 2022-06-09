@@ -26,6 +26,11 @@ const Me = () => {
     Router.push("/");
   }
 
+  const logout = () => {
+    localStorage.removeItem("jwt");
+    Router.push("/");
+  };
+
   return (
     <Layout>
       {!authorized ? (
@@ -33,8 +38,18 @@ const Me = () => {
           <div>Unauthorized</div>
         </div>
       ) : (
-        <div className="content">
-          <div>Hello {name}</div>
+        <div className="container">
+          <div className="content">
+            <div>Hello {name}</div>
+            <div>
+              <button
+                onClick={logout}
+                style={{ padding: "16px", fontWeight: "bold" }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       )}
       <style jsx>{`
