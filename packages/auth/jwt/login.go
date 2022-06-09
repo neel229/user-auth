@@ -27,7 +27,7 @@ func Login(ctx context.Context, mc *mongo.Client, input Creds) (string, error) {
 	match, err := Verify(input.Password, user.Password)
 	if err != nil {
 		log.Println(err)
-		return "", ErrPassInvalid
+		return "", err
 	}
 	if !match {
 		return "", ErrPassInvalid

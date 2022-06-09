@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Creds struct {
@@ -98,9 +99,22 @@ func Main(input map[string]interface{}) *Response {
 	}
 	token, err := Login(ctx, client, user)
 	if err != nil {
-		return &Response{
-			StatusCode: http.StatusInternalServerError,
-			Body:       ErrInternalServer.Error(),
+		switch err {
+		case mongo.ErrNoDocuments:
+			return &Response{
+				StatusCode: http.StatusBadRequest,
+				Body:       ErrEmailNotExists.Error(),
+			}
+		case ErrPassInvalid:
+			return &Response{
+				StatusCode: http.StatusBadRequest,
+				Body:       ErrPassInvalid.Error(),
+			}
+		default:
+			return &Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       err.Error(),
+			}
 		}
 	}
 	return &Response{
